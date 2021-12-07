@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,16 +10,29 @@ import {
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { user, userDetails } from "../../utils/userDB";
+import useAuth from "../../hooks/useAuth";
 
 export default function LoginForm() {
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+
   const formik = useFormik({
     initialValues: initialValues(),
     validationSchema: Yup.object(validationSchema()),
     //validateOnChange: false, ---> Para desactivar las validaciones del formulario en tiempo real.
     onSubmit: (formValue) => {
-      console.log(formValue);
+      setError("");
+      const { username, password } = formValue;
+
+      if (username !== user.username || password !== user.password) {
+        setError("El usuario o la contraseña son incorrectos");
+      } else {
+        login(userDetails)
+      }
     },
   });
+
   return (
     <View>
       <Text style={styles.title}>Iniciar sesión</Text>
@@ -42,6 +55,8 @@ export default function LoginForm() {
 
       <Text style={styles.error}>{formik.errors.username}</Text>
       <Text style={styles.error}>{formik.errors.password}</Text>
+
+      <Text style={styles.error}>{error}</Text>
     </View>
   );
 }
